@@ -64,7 +64,7 @@ export class AppComponent {
     this.currentPath = null;
   }
 
-    // Handle checkbox selection
+  // Handle checkbox selection
   onSelectFile(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
     const filePath = checkbox.value;
