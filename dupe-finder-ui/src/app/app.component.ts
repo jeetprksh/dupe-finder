@@ -118,18 +118,31 @@ export class AppComponent {
   // Handle delete API call
   deleteSelectedFiles(): void {
     const payload = { paths: this.selectedPaths };
-
+  
     this.http.post('http://localhost:8080/deleteFiles', payload).subscribe({
-      next: response => {
-        console.log('Files deleted successfully:', response);
-        // Optionally refresh the UI or update the state
+      next: () => {
+        console.log('Files deleted successfully.');
+  
+        // Show success feedback
+        this.showFeedback('Selected files deleted successfully.', 'success');
+  
+        // Remove deleted thumbnails from duplicacyGroups
+        this.duplicacyGroups.forEach(group => {
+          group.fileInfos = group.fileInfos.filter((file: FileInfo) => !this.selectedPaths.includes(file.actualPath));
+        });
+  
+        // Clear selection
         this.selectedPaths = [];
       },
       error: error => {
         console.error('Error deleting files:', error);
+  
+        // Show error feedback
+        this.showFeedback('Failed to delete selected files. Check console for details.', 'error');
       }
     });
   }
+  
 }
 
 interface FileInfo {
