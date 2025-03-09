@@ -86,42 +86,38 @@
     position: relative;
     transition: transform 0.3s;
 }
-
 .thumbnail-container:hover {
-    transform: scale(1.05); /* Optional hover effect for the thumbnail */
+    transform: scale(1.05);
 }
-
 .drawer {
     position: absolute;
     top: 0;
-    left: 100%; /* Default to appear to the right of the thumbnail */
-    width: 300px; /* Increased width for more content space */
+    left: 100%;
+    width: 300px;
     background-color: #f8f9fa;
     color: #212529;
     border: 1px solid #dee2e6;
-    border-radius: 8px; /* Rounded corners */
+    border-radius: 8px;
     padding: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transform: translateX(-100%);
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease-in-out;
-    z-index: 1050; /* Ensures drawer is above thumbnails */
-    overflow-wrap: break-word; /* Ensures long text wraps within the drawer */
-    word-wrap: break-word; /* Added for legacy support */
+    z-index: 1050;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
     word-break: break-word;
-    font-size: 0.9rem; /* Decreased font size */
-}
-  
+    font-size: 0.9rem;
+} 
 .drawer.active {
-    transform: translateX(0); /* Slide the drawer into view */
+    transform: translateX(0);
     opacity: 1;
     visibility: visible;
 }
-
 .form-check {
-    z-index: 900; /* High enough to render above the thumbnail */
+    z-index: 900;
     position: absolute;
-    top: 5px; /* Adjust for proper alignment */
+    top: 5px;
     left: 5px;
 }

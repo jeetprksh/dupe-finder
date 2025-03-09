@@ -11,18 +11,17 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  inputText: string = ''; // To bind the input text
-  stringArray: string[] = []; // To store the added strings
-  isLoading: boolean = false; // Loader state
-  feedbackMessage: string = ''; // Feedback message
-  feedbackType: 'success' | 'error' | '' = ''; // Feedback type
-  duplicacyGroups: any[] = []; // To store API response for groups
+  inputText: string = '';
+  stringArray: string[] = [];
+  isLoading: boolean = false;
+  feedbackMessage: string = '';
+  feedbackType: 'success' | 'error' | '' = '';
+  duplicacyGroups: any[] = [];
   currentPath: string | null = null;
-  selectedPaths: string[] = []; // Array to store selected file paths
+  selectedPaths: string[] = [];
 
   constructor(private http: HttpClient) {}
 
-  // Add the input text to the array
   addToArray(): void {
     if (this.inputText.trim()) {
       this.stringArray.push(this.inputText.trim());
@@ -33,27 +32,24 @@ export class AppComponent {
     }
   }
 
-  // Clear the array
   clearArray(): void {
     this.stringArray = [];
     this.showFeedback('All paths cleared.', 'success');
   }
 
-  // Generate a random color for the badge
   getColorForPath(path: string): string {
     const hash = Array.from(path).reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0);
     const hue = hash % 360; // Generate a hue value between 0-360
     return `hsl(${hue}, 70%, 50%)`; // Use HSL for consistent, unique colors
   }
 
-  // Show feedback message
   showFeedback(message: string, type: 'success' | 'error'): void {
     this.feedbackMessage = message;
     this.feedbackType = type;
     setTimeout(() => {
       this.feedbackMessage = '';
       this.feedbackType = '';
-    }, 3000); // Hide message after 3 seconds
+    }, 3000);
   }
 
   showPath(path: string): void {
@@ -64,7 +60,6 @@ export class AppComponent {
     this.currentPath = null;
   }
 
-  // Handle checkbox selection
   onSelectFile(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
     const filePath = checkbox.value;
@@ -78,12 +73,10 @@ export class AppComponent {
 
   clearSelection(): void {
     this.selectedPaths = [];
-    // Reset all checkboxes
     const checkboxes = document.querySelectorAll('.form-check-input') as NodeListOf<HTMLInputElement>;
     checkboxes.forEach(checkbox => checkbox.checked = false);
   }
 
-  // Submit form (if needed in the future)
   onSubmit(): void {
     if (this.stringArray.length === 0) {
       this.showFeedback('The array is empty. Please add some paths first.', 'error');
@@ -91,7 +84,7 @@ export class AppComponent {
     }
 
     const payload = { rootDirectories: this.stringArray };
-    this.isLoading = true; // Show loader
+    this.isLoading = true;
 
     this.http.post<ApiResponse>('http://localhost:8080/findDuplicates', payload).subscribe({
       next: (response: ApiResponse) => {
@@ -102,42 +95,29 @@ export class AppComponent {
           });
         });
 
-        // Assign processed response to duplicacyGroups
         this.duplicacyGroups = response.duplicacyGroups;
         this.showFeedback('API call successful. Groups loaded.', 'success');
-        this.isLoading = false; // Hide loader
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error from API:', error);
         this.showFeedback('API call failed. Check console for details.', 'error');
-        this.isLoading = false; // Hide loader
+        this.isLoading = false;
       },
     });
   }
 
-  // Handle delete API call
   deleteSelectedFiles(): void {
     const payload = { paths: this.selectedPaths };
-  
     this.http.post('http://localhost:8080/deleteFiles', payload).subscribe({
       next: () => {
-        console.log('Files deleted successfully.');
-  
-        // Show success feedback
         this.showFeedback('Selected files deleted successfully.', 'success');
-  
-        // Remove deleted thumbnails from duplicacyGroups
         this.duplicacyGroups.forEach(group => {
           group.fileInfos = group.fileInfos.filter((file: FileInfo) => !this.selectedPaths.includes(file.actualPath));
         });
-  
-        // Clear selection
         this.selectedPaths = [];
       },
       error: error => {
-        console.error('Error deleting files:', error);
-  
-        // Show error feedback
         this.showFeedback('Failed to delete selected files. Check console for details.', 'error');
       }
     });
