@@ -17,6 +17,7 @@
 .content {
     flex-grow: 1;
     padding: 20px;
+    width: 1200px;
 }
 .form-label,
 .form-check-label {
