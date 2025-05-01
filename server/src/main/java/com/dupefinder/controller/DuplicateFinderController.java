@@ -6,10 +6,8 @@ import com.dupefinder.service.DuplicateFileFinderFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -20,6 +18,15 @@ public class DuplicateFinderController {
 
     @Autowired
     DuplicateFileFinder finder;
+
+    @PostMapping("/dupeMetadata")
+    public DuplicacyGroups dupeMetadata(@RequestParam("file") MultipartFile file) {
+        try {
+            return finder.processDupeMetadataFile(file);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @PostMapping(value = "/findDuplicates", produces = MediaType.APPLICATION_JSON_VALUE)
     public DuplicacyGroups findDuplicates(@RequestBody DuplicateFileFinderFilter filter) {

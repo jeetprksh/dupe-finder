@@ -1,10 +1,9 @@
 package com.dupefinder.service;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -73,6 +72,29 @@ public class DuplicateFileFinder {
                 files.add(dirChild);
             }
         }
+    }
+
+    public DuplicacyGroups processDupeMetadataFile(MultipartFile file) throws Exception {
+        List<DuplicacyGroup> duplicacyGroups = new ArrayList<>();
+        try (InputStream is = file.getInputStream()) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            String line;
+            List<String> filePaths = new ArrayList<>();
+            while ((line = reader.readLine()) != null) {
+                if (!line.startsWith("-----")) {
+                    String[] split = line.split("\t");
+                    String filePath = split[1] + "\\" + split[0];
+                    filePaths.add(filePath);
+                } else {
+                    if (!filePaths.isEmpty()) {
+                        DuplicacyGroup dg = new DuplicacyGroup(null, FileInfo.create(filePaths, appDirectory));
+                        duplicacyGroups.add(dg);
+                        filePaths.clear();
+                    }
+                }
+            }
+        }
+        return new DuplicacyGroups(duplicacyGroups);
     }
 
 }
