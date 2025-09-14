@@ -87,9 +87,9 @@
             <!-- Card Body -->
             <div class="card-body p-2">
               <h6 class="card-title text-truncate" style="max-width: 100%;">{{ file.name }}</h6>
-              <a [href]="file.actualPath" class="btn btn-sm btn-primary" target="_blank">
+              <button class="btn btn-sm btn-primary" (click)="viewFile(file)">
                 View File
-              </a>
+              </button>
             </div>
           </div>
 

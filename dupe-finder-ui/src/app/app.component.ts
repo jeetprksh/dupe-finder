@@ -110,6 +110,25 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  viewFile(file: FileInfo): void {
+    const payload = { path: file.actualPath };
+
+    this.http.post<any>('http://localhost:8080/cacheFile', payload).subscribe({
+      next: (response) => {
+        if (response.status && response.file) {
+          const fileUrl = `http://localhost:8085/${encodeURIComponent(response.file)}`;
+          window.open(fileUrl, '_blank');
+        } else {
+          this.showFeedback('Failed to cache file for viewing.', 'error');
+        }
+      },
+      error: (error) => {
+        console.error('Error caching file:', error);
+        this.showFeedback('Error while caching file.', 'error');
+      }
+    });
+  }
+
   onSubmit(): void {
     if (this.stringArray.length === 0) {
       this.showFeedback('The array is empty. Please add some paths first.', 'error');
