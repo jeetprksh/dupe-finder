@@ -1,5 +1,7 @@
 package com.dupefinder.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,12 +10,19 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Component
 public class DuplicateFileFinder {
 
     private final static MessageDigest messageDigest;
     private final static String appDirectory;
+    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     static {
         String homeDirectory = System.getProperty("user.home");
         appDirectory = homeDirectory + File.separator + "dup_files";
@@ -35,7 +44,10 @@ public class DuplicateFileFinder {
         for (String key : duplicacyMap.keySet()) {
             List<String> filePaths = duplicacyMap.get(key);
             if (filePaths.size() > 1) {
-                duplicacyGroupList.add(new DuplicacyGroup(key, FileInfo.create(filePaths, appDirectory)));
+                List<FileInfo> fileInfos = FileInfo.create(filePaths, appDirectory);
+                DuplicacyGroup duplicacyGroup = new DuplicacyGroup(key, fileInfos);
+                duplicacyGroupList.add(duplicacyGroup);
+                fileInfos.forEach(fi -> executor.submit(new ThumbnailGeneratorTask(duplicacyGroup.getUuid(), fi, appDirectory, messagingTemplate)));
             }
         }
         return new DuplicacyGroups(duplicacyGroupList);
@@ -87,7 +99,9 @@ public class DuplicateFileFinder {
                     filePaths.add(filePath);
                 } else {
                     if (!filePaths.isEmpty()) {
-                        DuplicacyGroup dg = new DuplicacyGroup(null, FileInfo.create(filePaths, appDirectory));
+                        List<FileInfo> fileInfos = FileInfo.create(filePaths, appDirectory);
+                        DuplicacyGroup dg = new DuplicacyGroup(null, fileInfos);
+                        fileInfos.forEach(fi -> executor.submit(new ThumbnailGeneratorTask(dg.getUuid(), fi, appDirectory, messagingTemplate)));
                         duplicacyGroups.add(dg);
                         filePaths.clear();
                     }

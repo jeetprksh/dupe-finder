@@ -5,11 +5,17 @@ import java.util.UUID;
 
 public class DuplicacyGroup {
 
-    private final String uuid = UUID.randomUUID().toString();
+    private String uuid = UUID.randomUUID().toString();
     private final String hash;
     private final List<FileInfo> fileInfos;
 
     public DuplicacyGroup(String hash, List<FileInfo> fileInfos) {
+        this.hash = hash;
+        this.fileInfos = fileInfos;
+    }
+
+    public DuplicacyGroup(String uuid, String hash, List<FileInfo> fileInfos) {
+        this.uuid = uuid;
         this.hash = hash;
         this.fileInfos = fileInfos;
     }
