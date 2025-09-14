@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { WebsocketService } from './websocket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +12,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   inputText: string = '';
   stringArray: string[] = [];
   isLoading: boolean = false;
@@ -19,8 +21,9 @@ export class AppComponent {
   duplicacyGroups: any[] = [];
   currentPath: string | null = null;
   selectedPaths: string[] = [];
+  private wsSub: Subscription | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private wsService: WebsocketService) {}
 
   addToArray(): void {
     if (this.inputText.trim()) {
@@ -88,10 +91,13 @@ export class AppComponent {
 
     this.http.post<ApiResponse>('http://localhost:8080/findDuplicates', payload).subscribe({
       next: (response: ApiResponse) => {
-        // Construct the full URL for each thumbnail
         response.duplicacyGroups.forEach(group => {
           group.fileInfos.forEach(file => {
-            file.thumbnail = `http://localhost:8081/${file.thumbnail}`;
+            if (file.thumbnail) {
+              file.thumbnail = `http://localhost:8085/${file.thumbnail}`;
+            } else {
+              file.thumbnail = 'assets/images/loading.gif';
+            }
           });
         });
 
@@ -122,16 +128,61 @@ export class AppComponent {
       }
     });
   }
+
+  ngOnInit(): void {
+    this.wsService.connect();
+
+    this.wsSub = this.wsService.thumbnailUpdates$.subscribe((update) => {
+      console.log('Thumbnail update:', update);
+
+      update.fileInfos.forEach((file: any) => {
+        file.thumbnail = `http://localhost:8085/${file.thumbnail}`;
+      });
+
+      const groupIndex = this.duplicacyGroups.findIndex(g => g.uuid === update.uuid);
+
+      if (groupIndex !== -1) {
+        const dg = this.duplicacyGroups[groupIndex];
+        const fiIndex = dg.fileInfos.findIndex((fi: FileInfo) => fi.uuid === update.fileInfos[0].uuid);
+
+        if (fiIndex !== -1) {
+          const updatedFileInfos = [...dg.fileInfos];
+          updatedFileInfos[fiIndex] = {
+            ...updatedFileInfos[fiIndex],
+            thumbnail: update.fileInfos[0].thumbnail
+          };
+
+          this.duplicacyGroups[groupIndex] = {
+            ...dg,
+            fileInfos: updatedFileInfos
+          };
+
+          this.duplicacyGroups = [...this.duplicacyGroups];
+        } else {
+          console.warn('Received update for unknown file in existing group:', update.fileInfos[0].uuid);
+        }
+      } else {
+        console.warn('Received update for unknown group:', update.uuid);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.wsSub?.unsubscribe();
+    this.wsService.disconnect();
+  }
   
 }
 
 interface FileInfo {
+  uuid: string;
   name: string;
   thumbnail: string;
   actualPath: string;
 }
 
 interface DuplicacyGroup {
+  uuid: string;
   hash: string;
   fileInfos: FileInfo[];
 }
