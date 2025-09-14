@@ -97,7 +97,18 @@ export class AppComponent implements OnInit, OnDestroy {
       checkbox.checked = this.selectedPaths.includes(checkbox.value);
     });
   }
-
+  
+  clearCache(): void {
+    this.http.delete('http://localhost:8080/clearCache').subscribe({
+      next: () => {
+        this.showFeedback('Cache cleared successfully.', 'success');
+      },
+      error: (error) => {
+        console.error('Error clearing cache:', error);
+        this.showFeedback('Failed to clear cache. Check console for details.', 'error');
+      }
+    });
+  }
 
   onSubmit(): void {
     if (this.stringArray.length === 0) {
