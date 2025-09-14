@@ -1,37 +1,44 @@
 <div class="d-flex vh-100">
   <!-- Sidebar -->
-  <div class="sidebar d-flex flex-column">
+  <div class="sidebar d-flex flex-column p-3">
     <h4 class="text-center mb-4">Input Sidebar</h4>
-    <form (ngSubmit)="onSubmit()" #directoryForm="ngForm">
-        <div class="mb-3">
-            <label for="inputText" class="form-label">Enter Directory Path</label>
-            <div class="input-group">
-                <input type="text" id="inputText" class="form-control" [(ngModel)]="inputText" name="inputText">
-                <button type="button" class="btn btn-success" (click)="addToArray()">Add</button>
-                <button type="button" class="btn btn-danger" (click)="clearArray()">Clear</button>
-            </div>
-        </div>
 
-        <div *ngIf="stringArray.length > 0" class="mt-3">
-          <h6>Added Paths:</h6>
-          <div>
-              <span *ngFor="let path of stringArray" class="badge" [style.background-color]="getColorForPath(path)">
-                  <span>{{ path }}</span>
-              </span>
-          </div>
+    <!-- Directory Paths Form -->
+    <form (ngSubmit)="onSubmit()" #directoryForm="ngForm">
+      <div class="mb-3">
+        <label for="inputText" class="form-label">Enter Directory Path</label>
+        <div class="input-group">
+          <input type="text" id="inputText" class="form-control" [(ngModel)]="inputText" name="inputText">
+          <button type="button" class="btn btn-success" (click)="addToArray()">Add</button>
+          <button type="button" class="btn btn-danger" (click)="clearArray()">Clear</button>
+        </div>
       </div>
 
-      <button type="submit" class="btn btn-primary mt-3 w-100">Submit</button>
+      <div *ngIf="stringArray.length > 0" class="mb-3">
+        <h6>Added Paths:</h6>
+        <div>
+          <span *ngFor="let path of stringArray" class="badge me-1 mb-1" [style.background-color]="getColorForPath(path)">
+            {{ path }}
+          </span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Submit</button>
     </form>
 
-    <div class="mb-3">
+    <hr>
+
+    <!-- Metadata File Upload -->
+    <div class="mt-3">
       <label for="metadataFile" class="form-label">Upload Metadata File (.txt)</label>
       <input type="file" id="metadataFile" class="form-control" (change)="onFileSelected($event)" accept=".txt">
-      <button type="button" class="btn btn-primary mt-2 w-100" (click)="uploadMetadataFile()" [disabled]="!selectedFile">
+      <button type="button" class="btn btn-primary mt-2 w-100" 
+              (click)="uploadMetadataFile()" 
+              [disabled]="!selectedFile">
         Upload File
       </button>
     </div>
-</div>
+  </div>
 
   <!-- Main Content -->
   <div class="content p-4 flex-grow-1">
