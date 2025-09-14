@@ -129,7 +129,7 @@ public class DuplicateFileFinder {
             String cachedFilePath = appDirectory + "\\static_content\\" + cachedFileName;
             File cachedFile = new File(cachedFilePath);
             FileUtils.copyFile(fileToCache, cachedFile);
-            return new CacheFileResponse(false, "File cached for viewing", cachedFile.getName());
+            return new CacheFileResponse(true, "File cached for viewing", cachedFile.getName());
         } else {
             return new CacheFileResponse(false, "File does not exists", null);
         }
