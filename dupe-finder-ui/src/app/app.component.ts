@@ -22,6 +22,7 @@ export class AppComponent implements OnInit, OnDestroy {
   currentPath: string | null = null;
   selectedPaths: string[] = [];
   private wsSub: Subscription | null = null;
+  selectedFile: File | null = null;
 
   constructor(private http: HttpClient, private wsService: WebsocketService) {}
 
@@ -91,19 +92,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.http.post<ApiResponse>('http://localhost:8080/findDuplicates', payload).subscribe({
       next: (response: ApiResponse) => {
-        response.duplicacyGroups.forEach(group => {
-          group.fileInfos.forEach(file => {
-            if (file.thumbnail) {
-              file.thumbnail = `http://localhost:8085/${file.thumbnail}`;
-            } else {
-              file.thumbnail = 'assets/images/loading.gif';
-            }
-          });
-        });
-
-        this.duplicacyGroups = response.duplicacyGroups;
-        this.showFeedback('API call successful. Groups loaded.', 'success');
-        this.isLoading = false;
+        this.renderDuplicacyGroups(response);
       },
       error: (error) => {
         console.error('Error from API:', error);
@@ -111,6 +100,22 @@ export class AppComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
     });
+  }
+
+  private renderDuplicacyGroups(response: ApiResponse) {
+    response.duplicacyGroups.forEach(group => {
+      group.fileInfos.forEach(file => {
+        if (file.thumbnail) {
+          file.thumbnail = `http://localhost:8085/${file.thumbnail}`;
+        } else {
+          file.thumbnail = 'assets/images/loading.gif';
+        }
+      });
+    });
+
+    this.duplicacyGroups = response.duplicacyGroups;
+    this.showFeedback('API call successful. Groups loaded.', 'success');
+    this.isLoading = false;
   }
 
   deleteSelectedFiles(): void {
@@ -125,6 +130,31 @@ export class AppComponent implements OnInit, OnDestroy {
       },
       error: error => {
         this.showFeedback('Failed to delete selected files. Check console for details.', 'error');
+      }
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  uploadMetadataFile(): void {
+    if (!this.selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.http.post<ApiResponse>('http://localhost:8080/dupeMetadata', formData).subscribe({
+      next: (response: ApiResponse) => {
+        this.renderDuplicacyGroups(response);
+        this.selectedFile = null;
+      },
+      error: (err) => {
+        console.error(err);
+        this.showFeedback('Failed to upload file.', 'error');
       }
     });
   }
