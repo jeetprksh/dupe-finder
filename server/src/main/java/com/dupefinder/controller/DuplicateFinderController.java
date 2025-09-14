@@ -49,4 +49,14 @@ public class DuplicateFinderController {
             return ResponseEntity.internalServerError().body(new ApiResponse(false, "Some Problem"));
         }
     }
+
+    @DeleteMapping(value = "/clearCache", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse> clearCache() {
+        try {
+            finder.clearCache();
+            return ResponseEntity.ok(new ApiResponse(true, "Cache cleared"));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(new ApiResponse(false, "Some Problem"));
+        }
+    }
 }

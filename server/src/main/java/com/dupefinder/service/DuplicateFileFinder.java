@@ -1,5 +1,6 @@
 package com.dupefinder.service;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -111,4 +112,9 @@ public class DuplicateFileFinder {
         return new DuplicacyGroups(duplicacyGroups);
     }
 
+    public void clearCache() throws IOException {
+        String staticContentDirectoryPath = appDirectory + "\\static_content\\";
+        File staticContentDirectory = new File(staticContentDirectoryPath);
+        FileUtils.cleanDirectory(staticContentDirectory);
+    }
 }
