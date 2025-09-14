@@ -42,10 +42,9 @@ public class ThumbnailGeneratorTask implements Runnable {
 
             File outputFile = new File(appDirectory + "\\static_content\\", thName);
             ImageIO.write(thumbnail, "png", outputFile);
-
-            System.out.println("Thumbnail created: " + outputFile.getAbsolutePath());
+            
             DuplicacyGroup dg = new DuplicacyGroup(duplicacyGroupUuid, "",
-                    Collections.singletonList(new FileInfo(UUID.randomUUID().toString(), imageFile.getName(), thName, fileInfo.actualPath())));
+                    Collections.singletonList(new FileInfo(fileInfo.uuid(), imageFile.getName(), thName, fileInfo.actualPath())));
             messagingTemplate.convertAndSend("/topic/thumbnails", dg);
         } catch (IOException e) {
             e.printStackTrace();
