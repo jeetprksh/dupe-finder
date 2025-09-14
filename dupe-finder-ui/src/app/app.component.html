@@ -38,6 +38,20 @@
         Upload File
       </button>
     </div>
+
+    <hr>
+
+    <div class="mt-auto d-flex flex-column gap-2">
+      <button class="btn btn-danger w-100" [disabled]="selectedPaths.length === 0" (click)="deleteSelectedFiles()">
+        Delete Selected
+      </button>
+      <button class="btn btn-secondary w-100" [disabled]="selectedPaths.length === 0" (click)="clearSelection()">
+        Clear Selection
+      </button>
+      <button class="btn btn-info w-100" [disabled]="duplicacyGroups.length === 0" (click)="selectAllExceptOne()">
+        Select All
+      </button>
+    </div>
   </div>
 
   <!-- Main Content -->
@@ -81,17 +95,6 @@
             {{ file.actualPath }}
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="mt-4">
-      <div class="d-flex justify-content-between gap-2">
-        <button class="btn btn-danger flex-grow-1" [disabled]="selectedPaths.length === 0" (click)="deleteSelectedFiles()">
-          Delete Selected
-        </button>
-        <button class="btn btn-secondary flex-grow-1" [disabled]="selectedPaths.length === 0" (click)="clearSelection()">
-          Clear Selection
-        </button>
       </div>
     </div>
     

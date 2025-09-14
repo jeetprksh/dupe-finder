@@ -81,6 +81,24 @@ export class AppComponent implements OnInit, OnDestroy {
     checkboxes.forEach(checkbox => checkbox.checked = false);
   }
 
+  selectAllExceptOne(): void {
+    this.selectedPaths = []; // Reset first
+
+    this.duplicacyGroups.forEach(group => {
+      // Leave the last FileInfo unselected
+      group.fileInfos.slice(0, -1).forEach((file: FileInfo) => {
+        this.selectedPaths.push(file.actualPath);
+      });
+    });
+
+    // Update checkboxes in the DOM
+    const checkboxes = document.querySelectorAll('.form-check-input') as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = this.selectedPaths.includes(checkbox.value);
+    });
+  }
+
+
   onSubmit(): void {
     if (this.stringArray.length === 0) {
       this.showFeedback('The array is empty. Please add some paths first.', 'error');
@@ -123,10 +141,18 @@ export class AppComponent implements OnInit, OnDestroy {
     this.http.post('http://localhost:8080/deleteFiles', payload).subscribe({
       next: () => {
         this.showFeedback('Selected files deleted successfully.', 'success');
-        this.duplicacyGroups.forEach(group => {
-          group.fileInfos = group.fileInfos.filter((file: FileInfo) => !this.selectedPaths.includes(file.actualPath));
-        });
-        this.selectedPaths = [];
+      // Remove deleted files from fileInfos
+      this.duplicacyGroups.forEach(group => {
+        group.fileInfos = group.fileInfos.filter((file: FileInfo) => 
+          !this.selectedPaths.includes(file.actualPath)
+        );
+      });
+
+      // Remove groups that now have only 1 fileInfo
+      this.duplicacyGroups = this.duplicacyGroups.filter(group => group.fileInfos.length > 1);
+
+      // Clear selection
+      this.selectedPaths = [];
       },
       error: error => {
         this.showFeedback('Failed to delete selected files. Check console for details.', 'error');
