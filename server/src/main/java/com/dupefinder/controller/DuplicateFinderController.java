@@ -59,4 +59,13 @@ public class DuplicateFinderController {
             return ResponseEntity.internalServerError().body(new ApiResponse(false, "Some Problem"));
         }
     }
+
+    @PostMapping(value = "/cacheFile", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CacheFileResponse> cacheFile(@RequestBody CacheFileRequest cacheFileRequest) {
+        try {
+            return ResponseEntity.ok(finder.cacheFile(cacheFileRequest.path()));
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body(new CacheFileResponse(false, "Some Problem", null));
+        }
+    }
 }

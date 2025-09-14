@@ -1,6 +1,9 @@
 package com.dupefinder.service;
 
+import com.dupefinder.controller.CacheFileRequest;
+import com.dupefinder.controller.CacheFileResponse;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -116,5 +119,19 @@ public class DuplicateFileFinder {
         String staticContentDirectoryPath = appDirectory + "\\static_content\\";
         File staticContentDirectory = new File(staticContentDirectoryPath);
         FileUtils.cleanDirectory(staticContentDirectory);
+    }
+
+    public CacheFileResponse cacheFile(String path) throws Exception {
+        File fileToCache = new File(path);
+        if (fileToCache.exists()) {
+            String fileToCacheName = fileToCache.getName();
+            String cachedFileName = fileToCacheName.split("\\.")[0] + "-" + RandomStringUtils.insecure().nextAlphanumeric(4) + "." + fileToCacheName.split("\\.")[1];
+            String cachedFilePath = appDirectory + "\\static_content\\" + cachedFileName;
+            File cachedFile = new File(cachedFilePath);
+            FileUtils.copyFile(fileToCache, cachedFile);
+            return new CacheFileResponse(false, "File cached for viewing", cachedFile.getName());
+        } else {
+            return new CacheFileResponse(false, "File does not exists", null);
+        }
     }
 }
