@@ -164,30 +164,55 @@ export class AppComponent implements OnInit, OnDestroy {
     this.showFeedback('API call successful. Groups loaded.', 'success');
     this.isLoading = false;
   }
-
+  
   deleteSelectedFiles(): void {
     const payload = { paths: this.selectedPaths };
+    const deletedPaths = new Set(this.selectedPaths);
+
     this.http.post('http://localhost:8080/deleteFiles', payload).subscribe({
       next: () => {
         this.showFeedback('Selected files deleted successfully.', 'success');
-      // Remove deleted files from fileInfos
-      this.duplicacyGroups.forEach(group => {
-        group.fileInfos = group.fileInfos.filter((file: FileInfo) => 
-          !this.selectedPaths.includes(file.fullPath)
+
+        this.duplicacyGroups.forEach(group => {
+          // 1️⃣ Update grouped structure (UI source of truth)
+          if (group.fileInfosGroupByDirectory) {
+            const updatedGroups: DirectoryGroup = {};
+
+            for (const [dir, files] of Object.entries(group.fileInfosGroupByDirectory)) {
+              const remainingFiles = (files as FileInfo[]).filter(
+                f => !deletedPaths.has(f.fullPath)
+              );
+
+              if (remainingFiles.length > 0) {
+                updatedGroups[dir] = remainingFiles;
+              }
+            }
+
+            group.fileInfosGroupByDirectory = updatedGroups;
+          }
+
+          // 2️⃣ Keep fileInfos in sync (used elsewhere)
+          group.fileInfos = group.fileInfos.filter(
+            (file: FileInfo) => !deletedPaths.has(file.fullPath)
+          );
+        });
+
+        // 3️⃣ Remove groups that now have ≤1 file
+        this.duplicacyGroups = this.duplicacyGroups.filter(
+          g => g.fileInfos.length > 1
         );
-      });
 
-      // Remove groups that now have only 1 fileInfo
-      this.duplicacyGroups = this.duplicacyGroups.filter(group => group.fileInfos.length > 1);
-
-      // Clear selection
-      this.selectedPaths = [];
+        // 4️⃣ Clear selection + force change detection
+        this.selectedPaths = [];
+        this.duplicacyGroups = [...this.duplicacyGroups];
       },
       error: error => {
-        this.showFeedback('Failed to delete selected files. Check console for details.', 'error');
+        console.error(error);
+        this.showFeedback('Failed to delete selected files.', 'error');
       }
     });
   }
+
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
