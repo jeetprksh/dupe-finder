@@ -9,8 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.UUID;
-import java.util.concurrent.Callable;
 
 public class ThumbnailGeneratorTask implements Runnable {
 
@@ -30,7 +28,7 @@ public class ThumbnailGeneratorTask implements Runnable {
     @Override
     public void run() {
         try {
-            File imageFile = new File(fileInfo.actualPath());
+            File imageFile = new File(fileInfo.fullPath());
             String thName = imageFile.getName().split("\\.")[0] + "-" + RandomStringUtils.insecure().nextAlphanumeric(4) + ".png";
             BufferedImage img = ImageIO.read(imageFile);
             if (img == null) {
@@ -44,7 +42,7 @@ public class ThumbnailGeneratorTask implements Runnable {
             ImageIO.write(thumbnail, "png", outputFile);
             
             DuplicacyGroup dg = new DuplicacyGroup(duplicacyGroupUuid, "",
-                    Collections.singletonList(new FileInfo(fileInfo.uuid(), imageFile.getName(), thName, fileInfo.actualPath())));
+                    Collections.singletonList(new FileInfo(fileInfo.uuid(), imageFile.getName(), thName, fileInfo.fullPath(), imageFile.getParent())));
             messagingTemplate.convertAndSend("/topic/thumbnails", dg);
         } catch (IOException e) {
             e.printStackTrace();
