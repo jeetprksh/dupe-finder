@@ -75,30 +75,67 @@
     <!-- Duplicacy Groups -->
     <div *ngFor="let group of duplicacyGroups; let i = index" class="mb-4">
       <h4>Group {{ i + 1 }}</h4>
-      <div class="row">
-        <div *ngFor="let file of group.fileInfos" class="col-6 col-md-3 col-lg-2 position-relative">
-          <!-- Checkbox for selection -->
-          <div class="form-check position-absolute" style="top: 5px; left: 5px;">
-            <input type="checkbox" class="form-check-input" [value]="file.actualPath" (change)="onSelectFile($event)">
-          </div>
-          <div class="card thumbnail-container" (mouseover)="showPath(file.actualPath)" (mouseleave)="hidePath()">
-            <!-- Thumbnail -->
-            <img [src]="file.thumbnail" class="card-img-top" [alt]="file.name">
-            <!-- Card Body -->
-            <div class="card-body p-2">
-              <h6 class="card-title text-truncate" style="max-width: 100%;">{{ file.name }}</h6>
-              <button class="btn btn-sm btn-primary" (click)="viewFile(file)">
-                View File
-              </button>
-            </div>
+      <div class="subgroup-flow">
+        <div
+          *ngFor="let entry of asDirectoryGroup(group.fileInfosGroupByDirectory) | keyvalue"
+          class="subgroup-box"
+          [style.backgroundColor]="getSubgroupColor(entry.key)"
+        >
+          <!-- Directory label -->
+          <div class="subgroup-header" title="{{ entry.key }}">
+            {{ shortenPath(entry.key) }}
           </div>
 
-          <!-- Drawer -->
-          <div class="drawer" [class.active]="currentPath === file.actualPath">
-            {{ file.actualPath }}
+          <!-- Files inside this directory -->
+          <div class="subgroup-files">
+            <div
+              *ngFor="let file of entry.value"
+              class="file-card-wrapper position-relative"
+            >
+              <!-- Checkbox -->
+              <div class="form-check position-absolute">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [value]="file.fullPath"
+                  (change)="onSelectFile($event)"
+                />
+              </div>
+
+              <!-- Thumbnail card -->
+              <div
+                class="card thumbnail-container"
+                (mouseover)="showPath(file.fullPath)"
+                (mouseleave)="hidePath()"
+              >
+                <img
+                  [src]="file.thumbnail"
+                  class="card-img-top"
+                  [alt]="file.name"
+                />
+
+                <div class="card-body p-2">
+                  <h6 class="card-title text-truncate">
+                    {{ file.name }}
+                  </h6>
+                  <button
+                    class="btn btn-sm btn-primary"
+                    (click)="viewFile(file)"
+                  >
+                    View File
+                  </button>
+                </div>
+              </div>
+
+              <!-- Path drawer -->
+              <div class="drawer" [class.active]="currentPath === file.fullPath">
+                {{ file.fullPath }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
     
   </div>

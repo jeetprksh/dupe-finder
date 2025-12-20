@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -8,7 +7,7 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -87,7 +86,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.duplicacyGroups.forEach(group => {
       // Leave the last FileInfo unselected
       group.fileInfos.slice(0, -1).forEach((file: FileInfo) => {
-        this.selectedPaths.push(file.actualPath);
+        this.selectedPaths.push(file.fullPath);
       });
     });
 
@@ -111,7 +110,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   viewFile(file: FileInfo): void {
-    const payload = { path: file.actualPath };
+    const payload = { path: file.fullPath };
 
     this.http.post<any>('http://localhost:8080/cacheFile', payload).subscribe({
       next: (response) => {
@@ -174,7 +173,7 @@ export class AppComponent implements OnInit, OnDestroy {
       // Remove deleted files from fileInfos
       this.duplicacyGroups.forEach(group => {
         group.fileInfos = group.fileInfos.filter((file: FileInfo) => 
-          !this.selectedPaths.includes(file.actualPath)
+          !this.selectedPaths.includes(file.fullPath)
         );
       });
 
@@ -215,42 +214,63 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  shortenPath(fullPath: string): string {
+    const parts = fullPath.replace(/\\/g, '/').split('/');
+    if (parts.length <= 2) {
+      return fullPath;
+    }
+    return `.../${parts.slice(-2).join('/')}`;
+  }
+
+  getSubgroupColor(path: string): string {
+    const hash = Array.from(path).reduce(
+      (acc, c) => c.charCodeAt(0) + ((acc << 5) - acc),
+      0
+    );
+    const hue = Math.abs(hash) % 360;
+    return `hsla(${hue}, 70%, 85%, 0.4)`; // translucent
+  }
+
+  asDirectoryGroup(group: unknown): DirectoryGroup {
+    return group as DirectoryGroup;
+  }
+
   ngOnInit(): void {
     this.wsService.connect();
 
     this.wsSub = this.wsService.thumbnailUpdates$.subscribe((update) => {
-      console.log('Thumbnail update:', update);
+      const updatedFile = update.fileInfos[0];
 
-      update.fileInfos.forEach((file: any) => {
-        file.thumbnail = `http://localhost:8085/${file.thumbnail}`;
-      });
+      const group = this.duplicacyGroups.find(g => g.uuid === update.uuid);
 
-      const groupIndex = this.duplicacyGroups.findIndex(g => g.uuid === update.uuid);
+      if (!group || !group.fileInfosGroupByDirectory) {
+        console.warn('WS update for unknown group', update.uuid);
+        return;
+      }
 
-      if (groupIndex !== -1) {
-        const dg = this.duplicacyGroups[groupIndex];
-        const fiIndex = dg.fileInfos.findIndex((fi: FileInfo) => fi.uuid === update.fileInfos[0].uuid);
+      for (const [directoryPath, files] of Object.entries(group.fileInfosGroupByDirectory)) {
+        const typedFiles = files as FileInfo[];
 
-        if (fiIndex !== -1) {
-          const updatedFileInfos = [...dg.fileInfos];
-          updatedFileInfos[fiIndex] = {
-            ...updatedFileInfos[fiIndex],
-            thumbnail: update.fileInfos[0].thumbnail
-          };
+        const index = typedFiles.findIndex(
+          (f: FileInfo) => f.uuid === updatedFile.uuid
+        );
 
-          this.duplicacyGroups[groupIndex] = {
-            ...dg,
-            fileInfos: updatedFileInfos
+        if (index !== -1) {
+          typedFiles[index] = {
+            ...typedFiles[index],
+            thumbnail: `http://localhost:8085/${updatedFile.thumbnail}`
           };
 
           this.duplicacyGroups = [...this.duplicacyGroups];
-        } else {
-          console.warn('Received update for unknown file in existing group:', update.fileInfos[0].uuid);
+          return;
         }
-      } else {
-        console.warn('Received update for unknown group:', update.uuid);
       }
+
+      console.warn('WS update: file not found in any directory', updatedFile.uuid);
     });
+
+
+
   }
 
   ngOnDestroy(): void {
@@ -264,7 +284,8 @@ interface FileInfo {
   uuid: string;
   name: string;
   thumbnail: string;
-  actualPath: string;
+  fullPath: string;
+  directoryPath: string;
 }
 
 interface DuplicacyGroup {
@@ -276,3 +297,5 @@ interface DuplicacyGroup {
 interface ApiResponse {
   duplicacyGroups: DuplicacyGroup[];
 }
+
+type DirectoryGroup = Record<string, FileInfo[]>;

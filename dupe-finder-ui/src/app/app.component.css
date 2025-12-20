@@ -130,3 +130,43 @@
     top: 5px;
     left: 5px;
 }
+
+/* Flow container for subgroups */
+.subgroup-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* One directory subgroup */
+.subgroup-box {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Directory name */
+.subgroup-header {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Files inside subgroup */
+.subgroup-files {
+  display: flex;
+  gap: 12px;
+}
+
+/* Individual file wrapper */
+.file-card-wrapper {
+  width: 160px;
+}
