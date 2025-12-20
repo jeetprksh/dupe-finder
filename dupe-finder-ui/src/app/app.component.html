@@ -1,7 +1,7 @@
 <div class="d-flex vh-100">
   <!-- Sidebar -->
   <div class="sidebar d-flex flex-column p-3">
-    <h4 class="text-center mb-4">Input Sidebar</h4>
+    <h4 class="text-center mb-4">Duplicate Finder</h4>
 
     <!-- Directory Paths Form -->
     <form (ngSubmit)="onSubmit()" #directoryForm="ngForm">
@@ -59,7 +59,7 @@
 
   <!-- Main Content -->
   <div class="content flex-grow-1 p-4 overflow-auto">
-    <h1>Duplicacy Groups</h1>
+    <h2>Duplicacy Groups</h2>
 
     <div *ngIf="isLoading" class="loader-overlay">
       <div class="spinner-border text-primary" role="status">
@@ -74,7 +74,7 @@
 
     <!-- Duplicacy Groups -->
     <div *ngFor="let group of duplicacyGroups; let i = index" class="mb-4">
-      <h4>Group {{ i + 1 }}</h4>
+      <h5>Group {{ i + 1 }}</h5>
       <div class="subgroup-flow">
         <div
           *ngFor="let entry of asDirectoryGroup(group.fileInfosGroupByDirectory) | keyvalue"
@@ -103,11 +103,7 @@
               </div>
 
               <!-- Thumbnail card -->
-              <div
-                class="card thumbnail-container"
-                (mouseover)="showPath(file.fullPath)"
-                (mouseleave)="hidePath()"
-              >
+              <div class="card thumbnail-container">
                 <img
                   [src]="file.thumbnail"
                   class="card-img-top"
@@ -125,11 +121,6 @@
                     View File
                   </button>
                 </div>
-              </div>
-
-              <!-- Path drawer -->
-              <div class="drawer" [class.active]="currentPath === file.fullPath">
-                {{ file.fullPath }}
               </div>
             </div>
           </div>
