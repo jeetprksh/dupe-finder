@@ -18,7 +18,6 @@ export class AppComponent implements OnInit, OnDestroy {
   feedbackMessage: string = '';
   feedbackType: 'success' | 'error' | '' = '';
   duplicacyGroups: any[] = [];
-  currentPath: string | null = null;
   selectedPaths: string[] = [];
   private wsSub: Subscription | null = null;
   selectedFile: File | null = null;
@@ -55,14 +54,6 @@ export class AppComponent implements OnInit, OnDestroy {
     }, 3000);
   }
 
-  showPath(path: string): void {
-    this.currentPath = path;
-  }
-
-  hidePath(): void {
-    this.currentPath = null;
-  }
-
   onSelectFile(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
     const filePath = checkbox.value;
@@ -81,21 +72,33 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   selectAllExceptOne(): void {
-    this.selectedPaths = []; // Reset first
+    this.selectedPaths = [];
 
     this.duplicacyGroups.forEach(group => {
-      // Leave the last FileInfo unselected
-      group.fileInfos.slice(0, -1).forEach((file: FileInfo) => {
-        this.selectedPaths.push(file.fullPath);
+      if (!group.fileInfosGroupByDirectory) return;
+
+      Object.values(group.fileInfosGroupByDirectory).forEach(files => {
+        const typedFiles = files as FileInfo[];
+
+        // ✅ Only act if subgroup has more than 1 file
+        if (typedFiles.length > 1) {
+          typedFiles.slice(0, -1).forEach(file => {
+            this.selectedPaths.push(file.fullPath);
+          });
+        }
       });
     });
 
-    // Update checkboxes in the DOM
-    const checkboxes = document.querySelectorAll('.form-check-input') as NodeListOf<HTMLInputElement>;
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = this.selectedPaths.includes(checkbox.value);
+    // 🔁 Sync checkbox UI
+    const checkboxes = document.querySelectorAll(
+      '.form-check-input'
+    ) as NodeListOf<HTMLInputElement>;
+
+    checkboxes.forEach(cb => {
+      cb.checked = this.selectedPaths.includes(cb.value);
     });
   }
+
   
   clearCache(): void {
     this.http.delete('http://localhost:8080/clearCache').subscribe({
