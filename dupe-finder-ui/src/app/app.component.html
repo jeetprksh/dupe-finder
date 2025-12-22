@@ -29,7 +29,7 @@
     <hr>
 
     <!-- Metadata File Upload -->
-    <div class="mt-3">
+    <!-- <div class="mt-3">
       <label for="metadataFile" class="form-label">Upload Metadata File (.txt)</label>
       <input type="file" id="metadataFile" class="form-control" (change)="onFileSelected($event)" accept=".txt">
       <button type="button" class="btn btn-primary mt-2 w-100" 
@@ -39,18 +39,20 @@
       </button>
     </div>
 
-    <hr>
+    <hr> -->
 
     <div class="mt-auto d-flex flex-column gap-2">
       <button class="btn btn-danger w-100" [disabled]="selectedPaths.length === 0" (click)="deleteSelectedFiles()">
         Delete Selected
       </button>
-      <button class="btn btn-secondary w-100" [disabled]="selectedPaths.length === 0" (click)="clearSelection()">
-        Clear Selection
-      </button>
-      <button class="btn btn-info w-100" [disabled]="duplicacyGroups.length === 0" (click)="selectAllExceptOne()">
-        Select All
-      </button>
+      <div class="d-flex gap-2">
+        <button class="btn btn-info flex-fill" [disabled]="duplicacyGroups.length === 0" (click)="openSelectModal()"> 
+          Select 
+        </button>
+        <button class="btn btn-secondary flex-fill" [disabled]="selectedPaths.length === 0" (click)="clearSelection()">
+          Clear Selection
+        </button>
+      </div>
       <button class="btn btn-warning w-100" (click)="clearCache()">
         Clear Server Cache
       </button>
@@ -126,10 +128,79 @@
           </div>
         </div>
       </div>
-
     </div>
     
   </div>
+  <!-- Select Modal -->
+  <div *ngIf="showSelectModal">
+    <div class="modal-backdrop fade show"></div>
+
+    <div class="modal fade show d-block" tabindex="-1">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+
+          <!-- Header -->
+          <div class="modal-header">
+            <h5 class="modal-title">Select Files</h5>
+            <button type="button" class="btn-close" (click)="closeSelectModal()"></button>
+          </div>
+
+          <!-- Body -->
+          <div class="modal-body">
+            <div class="d-flex flex-column gap-2">
+
+              <!-- Select All -->
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="selectAllDirs"
+                  [(ngModel)]="modalSelectAll"
+                  (change)="onModalSelectAllChange()"
+                />
+                <label class="form-check-label fw-bold" for="selectAllDirs">
+                  Select All
+                </label>
+              </div>
+
+              <hr class="my-2" />
+
+              <!-- Directory list -->
+              <div
+                *ngFor="let dir of modalDirectories"
+                class="form-check ms-3"
+                [class.opacity-50]="modalSelectAll"
+              >
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [id]="dir"
+                  [disabled]="modalSelectAll"
+                  (change)="onDirectoryToggle(dir, $event)"
+                />
+                <label class="form-check-label" [for]="dir">
+                  {{ shortenPath(dir) }}
+                </label>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeSelectModal()">
+              Cancel
+            </button>
+            <button class="btn btn-primary" (click)="confirmSelection()">
+              OK
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+    
 </div>  
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -21,6 +21,10 @@ export class AppComponent implements OnInit, OnDestroy {
   selectedPaths: string[] = [];
   private wsSub: Subscription | null = null;
   selectedFile: File | null = null;
+  showSelectModal = false;
+  modalSelectAll = false;
+  modalSelectedDirs = new Set<string>();
+  allDirectories: string[] = [];
 
   constructor(private http: HttpClient, private wsService: WebsocketService) {}
 
@@ -166,6 +170,17 @@ export class AppComponent implements OnInit, OnDestroy {
     this.duplicacyGroups = response.duplicacyGroups;
     this.showFeedback('API call successful. Groups loaded.', 'success');
     this.isLoading = false;
+    const dirSet = new Set<string>();
+
+    response.duplicacyGroups.forEach(group => {
+      if (group.fileInfosGroupByDirectory) {
+        Object.keys(group.fileInfosGroupByDirectory).forEach(dir =>
+          dirSet.add(dir)
+        );
+      }
+    });
+
+    this.allDirectories = Array.from(dirSet).sort((a, b) => a.localeCompare(b));
   }
   
   deleteSelectedFiles(): void {
@@ -263,6 +278,69 @@ export class AppComponent implements OnInit, OnDestroy {
     return group as DirectoryGroup;
   }
 
+  openSelectModal(): void {
+    this.modalSelectAll = false;
+    this.modalSelectedDirs.clear();
+    this.showSelectModal = true;
+  }
+
+  closeSelectModal(): void {
+    this.showSelectModal = false;
+  }
+  
+  confirmSelection(): void {
+    this.clearSelection();
+
+    if (this.modalSelectAll) {
+      // Existing behavior
+      this.selectAllExceptOne();
+      this.closeSelectModal();
+      return;
+    }
+
+    // Directory-based selection
+    this.duplicacyGroups.forEach(group => {
+      if (!group.fileInfosGroupByDirectory) return;
+
+      for (const [dir, files] of Object.entries(group.fileInfosGroupByDirectory)) {
+        const typedFiles = files as FileInfo[];
+        if (!this.modalSelectedDirs.has(dir)) continue;
+
+        // ✅ Directory mode → select ALL files
+        typedFiles.forEach(file => {
+          this.selectedPaths.push(file.fullPath);
+        });
+      }
+    });
+
+    // Sync checkboxes
+    const checkboxes = document.querySelectorAll('.form-check-input') as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach(cb => cb.checked = this.selectedPaths.includes(cb.value));
+
+    this.closeSelectModal();
+  }
+  
+  onModalSelectAllChange(): void {
+    if (this.modalSelectAll) {
+      this.modalSelectedDirs.clear();
+    }
+  }
+
+
+  get modalDirectories(): string[] {
+    return this.allDirectories;
+  }
+
+  onDirectoryToggle(dir: string, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    if (checked) {
+      this.modalSelectedDirs.add(dir);
+    } else {
+      this.modalSelectedDirs.delete(dir);
+    }
+  }
+
   ngOnInit(): void {
     this.wsService.connect();
 
@@ -320,6 +398,7 @@ interface DuplicacyGroup {
   uuid: string;
   hash: string;
   fileInfos: FileInfo[];
+  fileInfosGroupByDirectory?: Record<string, FileInfo[]>;
 }
 
 interface ApiResponse {
