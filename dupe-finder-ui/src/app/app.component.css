@@ -21,6 +21,17 @@
     color: #fff;
     background-color: #495057;
 }
+.sidebar .btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+.sidebar .btn-secondary:hover {
+  background-color: #5c636a;
+  border-color: #565e64;
+}
+
 .content {
     flex-grow: 1;
     padding: 20px;
@@ -176,4 +187,134 @@
 
 .pointer-events-none {
   pointer-events: none;
+}
+
+/* Backdrop */
+.custom-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+/* Modal shell */
+.custom-modal {
+  width: 420px;
+  max-height: 80vh;
+  background: #1e1e1e;
+  color: #e5e5e5;
+  border-radius: 10px;
+  border: 1px solid #2e2e2e;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.custom-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #2e2e2e;
+}
+
+.custom-modal-header h5 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+/* Body */
+.custom-modal-body {
+  padding: 12px 16px;
+  overflow-y: auto;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  cursor: pointer;
+}
+
+.option-row input {
+  cursor: pointer;
+}
+
+.option-row.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.dir-name {
+  font-size: 13px;
+  color: #cfcfcf;
+  word-break: break-all;
+}
+
+.divider {
+  height: 1px;
+  background: #2e2e2e;
+  margin: 10px 0;
+}
+
+/* Footer */
+.custom-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid #2e2e2e;
+}
+
+/* Buttons */
+.btn-primary {
+  background: #0d6efd;
+  border: none;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 6px;
+}
+
+.btn-primary:hover {
+  background: #0b5ed7;
+}
+
+.btn-secondary {
+  background: #2b2b2b;
+  border: 1px solid #3a3a3a;
+  color: #ddd;
+  padding: 6px 14px;
+  border-radius: 6px;
+}
+
+.btn-secondary:hover {
+  background: #333;
+}
+
+.custom-select-modal .btn {
+  background-color: #343a40;
+  color: #adb5bd;
+  border: 1px solid #495057;
+}
+
+.custom-select-modal .btn:hover {
+  background-color: #495057;
+  color: #fff;
 }

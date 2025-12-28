@@ -340,6 +340,14 @@ export class AppComponent implements OnInit, OnDestroy {
       this.modalSelectedDirs.delete(dir);
     }
   }
+  
+  toggleDirectorySelection(dir: string): void {
+    if (this.modalSelectedDirs.has(dir)) {
+      this.modalSelectedDirs.delete(dir);
+    } else {
+      this.modalSelectedDirs.add(dir);
+    }
+  }
 
   ngOnInit(): void {
     this.wsService.connect();

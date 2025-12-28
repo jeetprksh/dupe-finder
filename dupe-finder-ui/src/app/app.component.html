@@ -133,69 +133,46 @@
   </div>
   <!-- Select Modal -->
   <div *ngIf="showSelectModal">
-    <div class="modal-backdrop fade show"></div>
+    <!-- Custom Select Modal -->
+    <div class="custom-modal-backdrop" *ngIf="showSelectModal">
+      <div class="custom-modal">
+        <div class="custom-modal-header">
+          <h5>Select Files</h5>
+          <button class="close-btn" (click)="closeSelectModal()">×</button>
+        </div>
 
-    <div class="modal fade show d-block" tabindex="-1">
-      <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="custom-modal-body">
+          <!-- Select All -->
+          <label class="option-row">
+            <input
+              type="checkbox"
+              [(ngModel)]="modalSelectAll"
+              (change)="onModalSelectAllChange()"
+            />
+            <span>Select All (leave one per directory)</span>
+          </label>
 
-          <!-- Header -->
-          <div class="modal-header">
-            <h5 class="modal-title">Select Files</h5>
-            <button type="button" class="btn-close" (click)="closeSelectModal()"></button>
-          </div>
+          <div class="divider"></div>
 
-          <!-- Body -->
-          <div class="modal-body">
-            <div class="d-flex flex-column gap-2">
+          <!-- Directory list -->
+          <label
+            class="option-row"
+            *ngFor="let dir of modalDirectories"
+            [class.disabled]="modalSelectAll"
+          >
+            <input
+              type="checkbox"
+              [disabled]="modalSelectAll"
+              [checked]="modalSelectedDirs.has(dir)"
+              (change)="toggleDirectorySelection(dir)"
+            />
+            <span class="dir-name">{{ dir }}</span>
+          </label>
+        </div>
 
-              <!-- Select All -->
-              <div class="form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="selectAllDirs"
-                  [(ngModel)]="modalSelectAll"
-                  (change)="onModalSelectAllChange()"
-                />
-                <label class="form-check-label fw-bold" for="selectAllDirs">
-                  Select All
-                </label>
-              </div>
-
-              <hr class="my-2" />
-
-              <!-- Directory list -->
-              <div
-                *ngFor="let dir of modalDirectories"
-                class="form-check ms-3"
-                [class.opacity-50]="modalSelectAll"
-              >
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  [id]="dir"
-                  [disabled]="modalSelectAll"
-                  (change)="onDirectoryToggle(dir, $event)"
-                />
-                <label class="form-check-label" [for]="dir">
-                  {{ shortenPath(dir) }}
-                </label>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Footer -->
-          <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="closeSelectModal()">
-              Cancel
-            </button>
-            <button class="btn btn-primary" (click)="confirmSelection()">
-              OK
-            </button>
-          </div>
-
+        <div class="custom-modal-footer">
+          <button class="btn-secondary" (click)="closeSelectModal()">Cancel</button>
+          <button class="btn-primary" (click)="confirmSelection()">OK</button>
         </div>
       </div>
     </div>
