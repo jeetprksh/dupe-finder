@@ -6,17 +6,23 @@ services:
       context: ./dupe-finder-ui
     container_name: dupe-finder-frontend
     ports:
-      - "4200:80"
+      - "4200:80" # serve compiled app on host:4200 -> container:80 (nginx)
+    environment:
+      - API_BASE_URL=http://host.docker.internal:8080
+      - WS_BASE_URL=ws://host.docker.internal:8080
+      - STATIC_CONTENT_URL=http://static-server
+    depends_on:
+      - static-server
     networks:
       - dupe-finder-network
 
-  nginx-static:
+  static-server:
     image: nginx:alpine
     container_name: dupe-finder-static
     volumes:
-      - ~/dup_files/static_content:/usr/share/nginx/html
+      - ${HOME}/dup_files/static_content:/usr/share/nginx/html:ro
     ports:
-      - "8081:80"
+      - "8085:80"
     networks:
       - dupe-finder-network
 
