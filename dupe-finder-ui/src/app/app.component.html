@@ -85,7 +85,28 @@
         >
           <!-- Directory label -->
           <div class="subgroup-header" title="{{ entry.key }}">
-            {{ shortenPath(entry.key) }}
+              <span class="subgroup-header-label">{{ shortenPath(entry.key) }}</span>
+
+              <button
+                type="button"
+                class="copy-btn"
+                [class.copied]="copiedKey === entry.key"
+                (click)="copyToClipboard(entry.key)"
+                aria-label="Copy full path"
+                title="Copy full path"
+              >
+                <ng-container *ngIf="copiedKey !== entry.key">
+                  <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </ng-container>
+                <ng-container *ngIf="copiedKey === entry.key">
+                  <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </ng-container>
+              </button>
           </div>
 
           <!-- Files inside this directory -->
@@ -113,9 +134,32 @@
                 />
 
                 <div class="card-body p-2">
-                  <h6 class="card-title text-truncate">
-                    {{ file.name }}
-                  </h6>
+                  <div class="card-title-wrapper">
+                    <h6 class="card-title text-truncate">
+                      {{ file.name }}
+                    </h6>
+
+                    <button
+                      type="button"
+                      class="copy-btn-sm"
+                      [class.copied]="copiedPath === file.fullPath"
+                      (click)="copyToClipboard(file.fullPath)"
+                      aria-label="Copy file path"
+                      title="Copy file path"
+                    >
+                      <ng-container *ngIf="copiedPath !== file.fullPath">
+                        <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                      </ng-container>
+                      <ng-container *ngIf="copiedPath === file.fullPath">
+                        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 6L9 17l-5-5"></path>
+                        </svg>
+                      </ng-container>
+                    </button>
+                  </div>
                   <button
                     class="btn btn-sm btn-primary"
                     (click)="viewFile(file)"

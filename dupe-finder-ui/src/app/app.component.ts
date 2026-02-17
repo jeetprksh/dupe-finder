@@ -23,6 +23,8 @@ export class AppComponent implements OnInit, OnDestroy {
   showSelectModal = false;
   modalSelectAll = false;
   modalSelectedDirs = new Set<string>();
+  copiedKey: string | null = null;
+  copiedPath: string | null = null;
   allDirectories: string[] = [];
 
   constructor(private http: HttpClient, private wsService: WebsocketService) {}
@@ -246,6 +248,35 @@ export class AppComponent implements OnInit, OnDestroy {
     );
     const hue = Math.abs(hash) % 360;
     return `hsla(${hue}, 70%, 85%, 0.4)`; // translucent
+  }
+
+  async copyToClipboard(text: string): Promise<void> {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+
+      this.copiedKey = text;
+      setTimeout(() => {
+        if (this.copiedKey === text) this.copiedKey = null;
+      }, 2000);
+      this.copiedPath = text;
+      setTimeout(() => {
+        if (this.copiedPath === text) this.copiedPath = null;
+      }, 2000);
+    } catch (err) {
+      console.error('Copy to clipboard failed', err);
+      this.showFeedback('Failed to copy to clipboard.', 'error');
+    }
   }
 
   asDirectoryGroup(group: unknown): DirectoryGroup {
