@@ -11,16 +11,6 @@
     position: sticky;
     top: 0;
 }
-.sidebar .nav-link {
-    color: #adb5bd;
-    font-weight: 500;
-    border-radius: 4px;
-}
-.sidebar .nav-link:hover,
-.sidebar .nav-link.active {
-    color: #fff;
-    background-color: #495057;
-}
 .sidebar .btn-secondary {
   background-color: #6c757d;
   border-color: #6c757d;
@@ -39,8 +29,7 @@
     height: 100vh;
     overflow-y: auto;
 }
-.form-label,
-.form-check-label {
+.form-label {
     color: #adb5bd;
 }
 .form-control {
@@ -64,9 +53,6 @@
     vertical-align: middle;
     direction: rtl;
     text-align: left;
-}
-.badge span {
-    direction: ltr;
 }
 .loader-overlay {
     position: fixed;
@@ -109,40 +95,11 @@
 .thumbnail-container:hover {
     transform: scale(1.05);
 }
-.drawer {
-    position: absolute;
-    top: 0;
-    left: 100%;
-    width: 350px;
-    background-color: #f8f9fa;
-    color: #212529;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transform: translateX(-100%);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease-in-out;
-    z-index: 1050;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: break-word;
-    font-size: 0.9rem;
-} 
-.drawer.active {
-    transform: translateX(0);
-    opacity: 1;
-    visibility: visible;
-}
 .file-card-wrapper .form-check {
     position: absolute;
     top: 5px;
     left: 5px;
     z-index: 900;
-}
-.modal .form-check {
-    position: static;
 }
 
 /* Flow container for subgroups */
@@ -183,10 +140,6 @@
 /* Individual file wrapper */
 .file-card-wrapper {
   width: 160px;
-}
-
-.pointer-events-none {
-  pointer-events: none;
 }
 
 /* Backdrop */
@@ -306,15 +259,4 @@
 
 .btn-secondary:hover {
   background: #333;
-}
-
-.custom-select-modal .btn {
-  background-color: #343a40;
-  color: #adb5bd;
-  border: 1px solid #495057;
-}
-
-.custom-select-modal .btn:hover {
-  background-color: #495057;
-  color: #fff;
 }
