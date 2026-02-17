@@ -20,7 +20,6 @@ export class AppComponent implements OnInit, OnDestroy {
   duplicacyGroups: any[] = [];
   selectedPaths: string[] = [];
   private wsSub: Subscription | null = null;
-  selectedFile: File | null = null;
   showSelectModal = false;
   modalSelectAll = false;
   modalSelectedDirs = new Set<string>();
@@ -232,31 +231,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-    }
-  }
-
-  uploadMetadataFile(): void {
-    if (!this.selectedFile) return;
-
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
-
-    this.http.post<ApiResponse>('http://localhost:8080/dupeMetadata', formData).subscribe({
-      next: (response: ApiResponse) => {
-        this.renderDuplicacyGroups(response);
-        this.selectedFile = null;
-      },
-      error: (err) => {
-        console.error(err);
-        this.showFeedback('Failed to upload file.', 'error');
-      }
-    });
-  }
-
   shortenPath(fullPath: string): string {
     const parts = fullPath.replace(/\\/g, '/').split('/');
     if (parts.length <= 2) {
@@ -331,16 +305,6 @@ export class AppComponent implements OnInit, OnDestroy {
     return this.allDirectories;
   }
 
-  onDirectoryToggle(dir: string, event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-
-    if (checked) {
-      this.modalSelectedDirs.add(dir);
-    } else {
-      this.modalSelectedDirs.delete(dir);
-    }
-  }
-  
   toggleDirectorySelection(dir: string): void {
     if (this.modalSelectedDirs.has(dir)) {
       this.modalSelectedDirs.delete(dir);
